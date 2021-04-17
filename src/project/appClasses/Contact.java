@@ -13,6 +13,7 @@ public class Contact implements Comparable<Contact>{
     private ArrayList<String>  emailAdresses;
     static int idStatic = 1;
     private int id;
+    private boolean active;
 
     public Contact() {
         id = idStatic;
@@ -91,5 +92,13 @@ public class Contact implements Comparable<Contact>{
 
     public void setEmailAdresses(ArrayList<String> emailAdresses) {
         this.emailAdresses = emailAdresses;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

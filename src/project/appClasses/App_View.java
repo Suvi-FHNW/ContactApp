@@ -5,6 +5,7 @@ import java.util.Locale;
 import java.util.logging.Logger;
 
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import project.ServiceLocator;
@@ -24,34 +25,27 @@ import javafx.stage.Stage;
  */
 public class App_View extends View<App_Model> {
 	private Translator t;
+	private ServiceLocator sl;
     Menu menuFile;
     Menu menuFileLanguage;
     Menu menuHelp;
-    
-    Label lblNumber;
-    Button btnClick;
 
     private Pane root;
     private VBox boxOverview;
     private GridPane gridDetails;
+    private VBox rootRight;
+    private GridDetails gdMain;
+    private GridDetails gdNewEntry;
 
     private Label title;
-    private ArrayList<Label> contactList = new ArrayList<>();
+    private ArrayList<Label> contactList;
     private ScrollPane paneContactList;
     private VBox boxContactList;
 
-    private Label lblFirstName;
-    private Label lblLastName;
-    private Label lblAddress;
-    private Label lblCity;
-    private Label lblZip;
-
-    private TextField tfFirstName;
-    private TextField tfLastName;
-    private TextField tfAddress;
-    private TextField tfCity;
-    private TextField tfZip;
-    private ArrayList<TextField> listTfDetails;
+    private Button btnEdit;
+    private Button btnSave;
+    private Button btnDelete;
+    private Button btnCreate;
 
 	public App_View(Stage stage, App_Model model) {
         super(stage, model);
@@ -60,7 +54,7 @@ public class App_View extends View<App_Model> {
 
 	@Override
 	protected Scene create_GUI() {
-	    ServiceLocator sl = ServiceLocator.getServiceLocator();  
+	    sl = ServiceLocator.getServiceLocator();
 	    Logger logger = sl.getLogger();
 	    t = sl.getTranslator();
 	    
@@ -81,6 +75,7 @@ public class App_View extends View<App_Model> {
 	    
         menuHelp = new Menu();
 	    menuBar.getMenus().addAll(menuFile, menuHelp);
+	    menuBar.setTranslateX(500);
 		
 		root = new Pane();
 		root.getChildren().add(menuBar);
@@ -96,7 +91,7 @@ public class App_View extends View<App_Model> {
 	}
 	
 	   protected void updateTexts() {
-	        
+			Translator t = sl.getTranslator();
 	        // The menu entries
 	       menuFile.setText(t.getString("program.menu.file"));
 	       menuFileLanguage.setText(t.getString("program.menu.file.language"));
@@ -104,7 +99,16 @@ public class App_View extends View<App_Model> {
 	        
 	        // Other controls
            // btnClick.setText(t.getString("button.clickme"));
-           
+           gdMain.getLblFirstName().setText(t.getString("lbl.firstName"));
+           gdMain.getLblLastName().setText(t.getString("lbl.lastName"));
+           gdMain.getLblAddress().setText(t.getString("lbl.address"));
+           gdMain.getLblCity().setText(t.getString("lbl.city"));
+           gdMain.getLblZip().setText(t.getString("lbl.zip"));
+           title.setText(t.getString("lbl.title"));
+           btnEdit.setText(t.getString("btn.edit"));
+           btnSave.setText(t.getString("btn.save"));
+           btnDelete.setText(t.getString("btn.delete"));
+           btnCreate.setText(t.getString("btn.create"));
            stage.setTitle(t.getString("program.name"));
 	   }
 
@@ -112,7 +116,7 @@ public class App_View extends View<App_Model> {
 	    boxOverview = new VBox(20);
 	    paneContactList = new ScrollPane();
 	    boxContactList = new VBox();
-	    title = new Label("Contacts");
+	    title = new Label(t.getString("lbl.title"));
 	    boxContactList.setMaxWidth(500);
 	    boxOverview.getChildren().add(title);
 	    contactList = new ArrayList<>();
@@ -133,47 +137,85 @@ public class App_View extends View<App_Model> {
 	    return boxOverview;
        }
 
-       private GridPane setRootRight() {
-		   gridDetails = new GridPane();
+       private VBox setRootRight() {
+		   rootRight = new VBox(50);
+		   gdMain = new GridDetails();
+		   rootRight.getChildren().add(gdMain);
 
-		   lblFirstName = new Label(t.getString("lbl.firstName"));
-		   lblLastName = new Label(t.getString("lbl.lastName"));
-		   lblAddress = new Label(t.getString("lbl.address"));
-		   lblCity = new Label(t.getString("lbl.city"));
-		   lblZip = new Label(t.getString("lbl.zip"));
+		   btnEdit = new Button(t.getString("btn.edit"));
+		   btnSave = new Button(t.getString("btn.save"));
+		   btnDelete = new Button(t.getString("btn.delete"));
+		   btnCreate = new Button(t.getString("btn.create"));
+		   HBox box = new HBox(5);
+		   box.getChildren().addAll(btnCreate, btnEdit, btnSave, btnDelete);
+		   rootRight.getChildren().add(box);
 
-		   gridDetails.add(lblFirstName, 0, 0);
-		   gridDetails.add(lblLastName, 0, 1);
-		   gridDetails.add(lblAddress, 0, 2);
-		   gridDetails.add(lblCity, 0, 3);
-		   gridDetails.add(lblZip, 0, 4);
-
-		   tfFirstName = new TextField();
-		   tfLastName = new TextField();
-		   tfAddress = new TextField();
-		   tfCity = new TextField();
-		   tfZip = new TextField();
-		   listTfDetails = new ArrayList<>();
-		   listTfDetails.add(tfFirstName);
-		   listTfDetails.add(tfLastName);
-		   listTfDetails.add(tfAddress);
-		   listTfDetails.add(tfCity);
-
-		   gridDetails.add(tfFirstName, 1, 0);
-		   gridDetails.add(tfLastName, 1, 1);
-		   gridDetails.add(tfAddress, 1, 2);
-		   gridDetails.add(tfCity, 1, 3);
-		   gridDetails.add(tfZip, 1, 4);
-
-		   for (TextField f : listTfDetails) {
+		   for (TextField f : gdMain.getListTfDetails()) {
 			   f.setEditable(false);
+			   f.setMinWidth(200);
 		   }
 
-		   gridDetails.setTranslateX(440);
-		   gridDetails.setTranslateY(100);
+		   rootRight.setTranslateX(440);
+		   rootRight.setTranslateY(100);
 
-		   return gridDetails;
+		   return rootRight;
 	   }
 
+	public void updateContactList() {
+		boxContactList.getChildren().removeAll(contactList);
+		contactList = new ArrayList<>();
+		for (Contact c : model.getContactTree()) {
+			Label l = new Label(c.getFirstName()+" "+c.getLastName());
+			contactList.add(l);
+			l.setMinWidth(300);
+		}
+		boxContactList.getChildren().addAll(contactList);
+	}
+
+	   public void createWindowNewContact() {
+		Pane root = new Pane();
+		gdNewEntry = new GridDetails();
+		root.getChildren().add(gdNewEntry);
+
+
+
+		Scene scene = new Scene(root);
+		Stage stage = new Stage();
+		stage.setScene(scene);
+		stage.show();
+	   }
+
+	public ArrayList<Label> getContactList() {
+		return contactList;
+	}
+
+	public void setContactList(ArrayList<Label> contactList) {
+		this.contactList = contactList;
+	}
+
+
+
+	public Button getBtnEdit() {
+		return btnEdit;
+	}
+
+
+	public Button getBtnSave() {
+		return btnSave;
+	}
+
+
+
+	public Button getBtnDelete() {
+		return btnDelete;
+	}
+
+	public Button getBtnCreate() {
+		return btnCreate;
+	}
+
+	public GridDetails getGdMain() {
+		return gdMain;
+	}
 }
 

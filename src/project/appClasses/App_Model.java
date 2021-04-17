@@ -20,8 +20,6 @@ public class App_Model extends Model {
     private ServiceLocator serviceLocator;
 
     private TreeSet<Contact> contactTree = new TreeSet<>();
-
-    // sdfdfsdf
     
     public App_Model() {
         serviceLocator = ServiceLocator.getServiceLocator();

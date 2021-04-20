@@ -2,6 +2,7 @@ package project.appClasses;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.logging.Logger;
 
 import javafx.scene.control.*;
@@ -11,7 +12,6 @@ import javafx.scene.layout.VBox;
 import project.ServiceLocator;
 import project.abstractClasses.View;
 import project.commonClasses.Translator;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
@@ -30,6 +30,8 @@ public class App_View extends View<App_Model> {
     Menu menuFileLanguage;
     Menu menuHelp;
 
+    private Stage stageNewEntry;
+
     private Pane root;
     private VBox boxOverview;
     private GridPane gridDetails;
@@ -45,7 +47,15 @@ public class App_View extends View<App_Model> {
     private Button btnEdit;
     private Button btnSave;
     private Button btnDelete;
-    private Button btnCreate;
+    private Button btnOpenCreate;
+    private Button btnCreate = new Button();
+    private Button btnCreateCancel = new Button();
+
+	private Alert alertError;
+	private Alert alertSuccess;
+
+
+
 
 	public App_View(Stage stage, App_Model model) {
         super(stage, model);
@@ -57,6 +67,8 @@ public class App_View extends View<App_Model> {
 	    sl = ServiceLocator.getServiceLocator();
 	    Logger logger = sl.getLogger();
 	    t = sl.getTranslator();
+
+	    initializeAlerts();
 	    
 	    MenuBar menuBar = new MenuBar();
 	    menuFile = new Menu();
@@ -89,8 +101,15 @@ public class App_View extends View<App_Model> {
                 getClass().getResource("app.css").toExternalForm());
         return scene;
 	}
-	
-	   protected void updateTexts() {
+
+	private void initializeAlerts() {
+		alertError = new Alert(Alert.AlertType.ERROR);
+		alertError.setContentText(t.getString("msg.inputError"));
+		alertSuccess = new Alert(Alert.AlertType.CONFIRMATION);
+		alertSuccess.setContentText(t.getString("msg.inputSuccess"));
+	}
+
+	protected void updateTexts() {
 			Translator t = sl.getTranslator();
 	        // The menu entries
 	       menuFile.setText(t.getString("program.menu.file"));
@@ -108,8 +127,14 @@ public class App_View extends View<App_Model> {
            btnEdit.setText(t.getString("btn.edit"));
            btnSave.setText(t.getString("btn.save"));
            btnDelete.setText(t.getString("btn.delete"));
-           btnCreate.setText(t.getString("btn.create"));
+           btnOpenCreate.setText(t.getString("btn.create"));
            stage.setTitle(t.getString("program.name"));
+           if (btnCreate != null) {
+           	btnCreate.setText(t.getString("btn.create"));
+           	btnCreateCancel.setText(t.getString("btn.createCancel"));
+		   }
+           alertError.setContentText(t.getString("msg.inputError"));
+           alertSuccess.setContentText(t.getString("msg.inputSuccess"));
 	   }
 
 	   private VBox setRootLeft() {
@@ -145,9 +170,9 @@ public class App_View extends View<App_Model> {
 		   btnEdit = new Button(t.getString("btn.edit"));
 		   btnSave = new Button(t.getString("btn.save"));
 		   btnDelete = new Button(t.getString("btn.delete"));
-		   btnCreate = new Button(t.getString("btn.create"));
+		   btnOpenCreate = new Button(t.getString("btn.create"));
 		   HBox box = new HBox(5);
-		   box.getChildren().addAll(btnCreate, btnEdit, btnSave, btnDelete);
+		   box.getChildren().addAll(btnOpenCreate, btnEdit, btnSave, btnDelete);
 		   rootRight.getChildren().add(box);
 
 		   for (TextField f : gdMain.getListTfDetails()) {
@@ -177,13 +202,48 @@ public class App_View extends View<App_Model> {
 		gdNewEntry = new GridDetails();
 		root.getChildren().add(gdNewEntry);
 
+		btnCreate.setText(t.getString("btn.create"));
+		btnCreateCancel.setText(t.getString("btn.createCancel"));
+		HBox box = new HBox(50);
+		box.getChildren().addAll(btnCreate, btnCreateCancel);
+
+		gdNewEntry.add(box, 0, 10, 2, 1);
 
 
 		Scene scene = new Scene(root);
-		Stage stage = new Stage();
-		stage.setScene(scene);
-		stage.show();
+		scene.getStylesheets().add(getClass().getResource("app.css").toExternalForm());
+		stageNewEntry = new Stage();
+		stageNewEntry.setScene(scene);
+		stageNewEntry.show();
 	   }
+
+	   public void closeWindowNewContact() {
+		stageNewEntry.close();
+	   }
+
+	   public void createErrorAlert() {
+		alertError = new Alert(Alert.AlertType.ERROR);
+		alertError.setContentText(t.getString("msg.inputError"));
+		alertError.show();
+	   }
+
+	   public void createSuccessAlert() {
+		   alertSuccess = new Alert(Alert.AlertType.CONFIRMATION);
+		   alertSuccess.setContentText(t.getString("msg.inputSuccess"));
+
+		   Optional<ButtonType> result = alertSuccess.showAndWait();
+
+		   if (result.get() == ButtonType.OK) {
+			   //ok button is pressed
+			   stageNewEntry.close();
+		   } else if(!result.isPresent()){
+		   		stageNewEntry.close();
+		   } else if(result.get() == ButtonType.CANCEL) {
+		   		stageNewEntry.close();
+		   }
+	   }
+
+
 
 	public ArrayList<Label> getContactList() {
 		return contactList;
@@ -193,29 +253,36 @@ public class App_View extends View<App_Model> {
 		this.contactList = contactList;
 	}
 
-
-
 	public Button getBtnEdit() {
 		return btnEdit;
 	}
-
 
 	public Button getBtnSave() {
 		return btnSave;
 	}
 
-
-
 	public Button getBtnDelete() {
 		return btnDelete;
+	}
+
+	public Button getBtnOpenCreate() {
+		return btnOpenCreate;
+	}
+
+	public GridDetails getGdMain() {
+		return gdMain;
 	}
 
 	public Button getBtnCreate() {
 		return btnCreate;
 	}
 
-	public GridDetails getGdMain() {
-		return gdMain;
+	public Button getBtnCreateCancel() {
+		return btnCreateCancel;
+	}
+
+	public GridDetails getGdNewEntry() {
+		return gdNewEntry;
 	}
 }
 

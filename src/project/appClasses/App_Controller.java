@@ -1,6 +1,7 @@
 package project.appClasses;
 
 
+import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import project.ServiceLocator;
@@ -43,8 +44,48 @@ public class App_Controller extends Controller<App_Model, App_View> {
             updateEventHandlerContactList();
         });
 
-        view.getBtnCreate().setOnAction(e -> {
+        view.getBtnOpenCreate().setOnAction(e -> {
             view.createWindowNewContact();
+        });
+
+        view.getBtnCreate().setOnAction(e -> {
+                Contact c = new Contact();
+                c.setFirstName(view.getGdNewEntry().getTfFirstName().getText());
+                c.setLastName(view.getGdNewEntry().getTfLastName().getText());
+                c.setAddress((view.getGdNewEntry().getTfAddress().getText()));
+                c.setCity(view.getGdNewEntry().getTfCity().getText());
+                c.setZip((view.getGdNewEntry().getTfZip().getText()));
+                if (view.getGdNewEntry().checkEntry()) {
+                    model.getContactTree().add(c);
+                    view.updateContactList();
+                    updateEventHandlerContactList();
+                    serviceLocator.getLogger().info("Contact successfully created");
+                    view.createSuccessAlert();
+
+                } else {
+                    view.createErrorAlert();
+                }
+        });
+
+        view.getGdMain().getBtnMorePhone().setOnAction(e -> {
+            if (view.getGdMain().isPhoneCollapsed()) {
+                view.getGdMain().getChildren().remove(view.getGdMain().getGridMorePhone());
+                view.getGdMain().add(view.getGdMain().getLblPhone(), 0, 5);
+                view.getGdMain().add(view.getGdMain().getTfPhone(), 1, 5);
+                view.getGdMain().setPhoneCollapsed(false);
+            } else {
+                view.getGdMain().getGridMorePhone().setModel(model);
+                view.getGdMain().getGridMorePhone().createGrid("Phone");
+                view.getGdMain().add(view.getGdMain().getGridMorePhone(), 0, 5, 2, 1);
+                view.getGdMain().getChildren().remove(view.getGdMain().getLblPhone());
+                view.getGdMain().getChildren().remove(view.getGdMain().getTfPhone());
+                view.getGdMain().setPhoneCollapsed(true);
+            }
+        });
+
+
+        view.getBtnCreateCancel().setOnAction(e -> {
+            view.closeWindowNewContact();
         });
         
         serviceLocator = ServiceLocator.getServiceLocator();        
@@ -102,7 +143,6 @@ public class App_Controller extends Controller<App_Model, App_View> {
         view.getGdMain().getTfAddress().setText("");
         view.getGdMain().getTfCity().setText("");
         view.getGdMain().getTfZip().setText("");
-
     }
 
     private void updateEventHandlerContactList(){

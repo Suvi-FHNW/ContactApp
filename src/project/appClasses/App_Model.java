@@ -29,12 +29,12 @@ public class App_Model extends Model {
         myFirstContact = new Contact();
         myFirstContact.setFirstName("Abel");
         contactTree.add(myFirstContact);
-         */
-
+        */
         for (Contact c : contactTree) {
-            System.out.println(c.getFirstName());
+            for (String s : c.getEmailAdresses()) {
+                System.out.println(s);
+            }
         }
-
 
         serviceLocator.getLogger().info("Application model initialized");
     }
@@ -42,7 +42,9 @@ public class App_Model extends Model {
     public void readData() {
         InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("project/appClasses/ressources/contacts.csv");
         String dataString ="";
-        String data[] = new String[10];
+        String data[];
+        String dataPhone[];
+        String dataEmail[];
         try (BufferedReader fileIn = new BufferedReader(new InputStreamReader(inStream))) {
             for (int i = 0; i < 20; i++) {
                 dataString = fileIn.readLine();
@@ -53,6 +55,16 @@ public class App_Model extends Model {
                 c.setAddress(data[2]);
                 c.setCity(data[3]);
                 c.setZip(data[4]);
+                dataPhone = data[5].split("\\.");
+                for (String s : dataPhone) {
+                    c.getPhoneNumbers().add(s);
+                }
+                dataEmail = data[6].split("%");
+                for (String s : dataEmail) {
+                    c.getEmailAdresses().add(s);
+                }
+
+
 
                 contactTree.add(c);
             }

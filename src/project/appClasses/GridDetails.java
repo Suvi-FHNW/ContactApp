@@ -1,5 +1,6 @@
 package project.appClasses;
 
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
@@ -14,13 +15,28 @@ public class GridDetails extends GridPane {
     private Label lblAddress;
     private Label lblCity;
     private Label lblZip;
+    private Label lblPhone;
+    private Label lblEmail;
 
     private TextField tfFirstName;
     private TextField tfLastName;
     private TextField tfAddress;
     private TextField tfCity;
     private TextField tfZip;
+    private TextField tfPhone;
+    private TextField tfEmail;
+
     private ArrayList<TextField> listTfDetails;
+
+    private Button btnMorePhone;
+    private Button btnMoreEmail;
+
+    private boolean phoneCollapsed;
+    private boolean emailCollapsed;
+
+    MoreDetails gridMorePhone = new MoreDetails();
+    MoreDetails gridMoreEmail = new MoreDetails();
+
 
     public GridDetails() {
         super();
@@ -30,30 +46,56 @@ public class GridDetails extends GridPane {
         lblAddress = new Label(t.getString("lbl.address"));
         lblCity = new Label(t.getString("lbl.city"));
         lblZip = new Label(t.getString("lbl.zip"));
+        lblPhone = new Label(t.getString("lbl.phone"));
+        lblEmail = new Label("Email");
 
         this.add(lblFirstName, 0, 0);
         this.add(lblLastName, 0, 1);
         this.add(lblAddress, 0, 2);
         this.add(lblCity, 0, 3);
         this.add(lblZip, 0, 4);
+        this.add(lblPhone, 0, 5);
+        this.add(lblEmail, 0, 6);
 
         tfFirstName = new TextField();
         tfLastName = new TextField();
         tfAddress = new TextField();
         tfCity = new TextField();
         tfZip = new TextField();
+        tfPhone = new TextField();
+        tfEmail = new TextField();
         listTfDetails = new ArrayList<>();
         listTfDetails.add(tfFirstName);
         listTfDetails.add(tfLastName);
         listTfDetails.add(tfAddress);
         listTfDetails.add(tfCity);
         listTfDetails.add(tfZip);
+        listTfDetails.add(tfPhone);
+        listTfDetails.add(tfEmail);
+
 
         this.add(tfFirstName, 1, 0);
         this.add(tfLastName, 1, 1);
         this.add(tfAddress, 1, 2);
         this.add(tfCity, 1, 3);
         this.add(tfZip, 1, 4);
+        this.add(tfPhone, 1, 5);
+        this.add(tfEmail, 1, 6);
+
+        btnMorePhone = new Button(t.getString("btn.more"));
+        btnMoreEmail = new Button(t.getString("btn.more"));
+
+        this.add(btnMorePhone, 2, 5);
+        this.add(btnMoreEmail, 2, 6);
+    }
+
+    public boolean checkEntry(){
+        for (TextField t : listTfDetails) {
+            if (t.getText().equals("")) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public Label getLblFirstName() {
@@ -142,5 +184,77 @@ public class GridDetails extends GridPane {
 
     public void setListTfDetails(ArrayList<TextField> listTfDetails) {
         this.listTfDetails = listTfDetails;
+    }
+
+    public Label getLblPhone() {
+        return lblPhone;
+    }
+
+    public Label getLblEmail() {
+        return lblEmail;
+    }
+
+    public TextField getTfPhone() {
+        return tfPhone;
+    }
+
+    public TextField getTfEmail() {
+        return tfEmail;
+    }
+
+    public Button getBtnMorePhone() {
+        return btnMorePhone;
+    }
+
+    public Button getBtnMoreEmail() {
+        return btnMoreEmail;
+    }
+
+    public void setLblPhone(Label lblPhone) {
+        this.lblPhone = lblPhone;
+    }
+
+    public void setLblEmail(Label lblEmail) {
+        this.lblEmail = lblEmail;
+    }
+
+    public void setTfPhone(TextField tfPhone) {
+        this.tfPhone = tfPhone;
+    }
+
+    public void setTfEmail(TextField tfEmail) {
+        this.tfEmail = tfEmail;
+    }
+
+    public void setBtnMorePhone(Button btnMorePhone) {
+        this.btnMorePhone = btnMorePhone;
+    }
+
+    public void setBtnMoreEmail(Button btnMoreEmail) {
+        this.btnMoreEmail = btnMoreEmail;
+    }
+
+    public boolean isPhoneCollapsed() {
+        return phoneCollapsed;
+    }
+
+    public void setPhoneCollapsed(boolean phoneCollapsed) {
+        this.phoneCollapsed = phoneCollapsed;
+    }
+
+    public boolean isEmailCollapsed() {
+        return emailCollapsed;
+    }
+
+    public void setEmailCollapsed(boolean emailCollapsed) {
+        this.emailCollapsed = emailCollapsed;
+    }
+
+    public MoreDetails getGridMorePhone() {
+        return gridMorePhone;
+    }
+
+    public MoreDetails getGridMoreEmail() {
+        return gridMoreEmail;
     }
 }

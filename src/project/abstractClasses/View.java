@@ -26,6 +26,7 @@ public abstract class View<M extends Model> {
         
         scene = create_GUI(); // Create all controls within "root"
         stage.setScene(scene);
+        stage.setResizable(false);
     }
 
     protected abstract Scene create_GUI();

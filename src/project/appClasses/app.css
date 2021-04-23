@@ -1,24 +1,61 @@
+.root {
+  -fx-font-family: Arial;
+  -fx-background-color: #FFF1D0;
+  -fx-text-fill: #3A4454;
+}
+
 .label {
   -fx-font-size: 14px;
   -fx-font-weight: bold;
-  -fx-font-style: italic;
-  -fx-text-fill: #008080;
+
 	-fx-border-insets: 5px;
 	-fx-border-color: black;
 	-fx-border-width: 2px;
     -fx-label-padding: 5px;
+    -fx-border-width: 0px;
+}
+
+#h1 {
+  -fx-font-size: 36px;
+  -fx-text-alignment: center;
+  -fx-padding: 10px;
+  -fx-border-style: none;
+  -fx-border-width: 0px;
+  -fx-text-fill: #3A4454;
+    -fx-underline: true;
+}
+
+.scroll-pane #box {
+  -fx-background-color: #FFF1D0;
 }
 
 .button {
-  -fx-font-size: 16px;
+  -fx-font-size: 14px;
   -fx-font-weight: bold;
   -fx-font-style: italic;
   -fx-text-fill: #000000;
+    -fx-background-color: #FFF1D0;
+    -fx-border-color: black;
+    -fx-border-width: 2px;
 }
 
+.button:hover {
+    -fx-background-color: #D1BC8A;
+    -fx-cursor: hand;
+}
+
+
 .menu .label {
-  -fx-font-size: 12px;
+  -fx-font-size: 14px;
   -fx-font-weight: bold;
-  -fx-text-fill: #800080;
   -fx-border-width: 0px;
+}
+
+#gridNewContact {
+  -fx-padding: 10px;
+}
+
+.lbl_hover {
+    -fx-background-color: #D1BC8A;
+    -fx-cursor: hand;
 }

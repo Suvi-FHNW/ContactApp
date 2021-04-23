@@ -3,10 +3,7 @@ package project.appClasses;
 import project.ServiceLocator;
 import project.abstractClasses.Model;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.TreeSet;
 
 /**
@@ -24,17 +21,6 @@ public class App_Model extends Model {
     public App_Model() {
         serviceLocator = ServiceLocator.getServiceLocator();
         readData();
-
-        /*
-        myFirstContact = new Contact();
-        myFirstContact.setFirstName("Abel");
-        contactTree.add(myFirstContact);
-        */
-        for (Contact c : contactTree) {
-            for (String s : c.getEmailAdresses()) {
-                System.out.println(s);
-            }
-        }
 
         serviceLocator.getLogger().info("Application model initialized");
     }
@@ -63,15 +49,39 @@ public class App_Model extends Model {
                 for (String s : dataEmail) {
                     c.getEmailAdresses().add(s);
                 }
-
-
-
                 contactTree.add(c);
             }
         } catch (IOException e) {
             serviceLocator.getLogger().info("Input file not found!");
         }
+    }
 
+    public void saveDataToFile() {
+        File file = new File("src/project/appClasses/ressources/contacts.csv");
+        String data="";
+        try (FileWriter fileOut = new FileWriter(file)) {
+            for (Contact c : contactTree) {
+                data = c.getFirstName()+","+c.getLastName()+","+c.getAddress()+","+c.getCity()+","+c.getZip()+",";
+                for (int i = 0; i < c.getPhoneNumbers().size(); i++) {
+                    data += c.getPhoneNumbers().get(i);
+                    if (i < c.getPhoneNumbers().size()-1) {
+                        data += ".";
+                    }
+                }
+                data += ",";
+                for (int i = 0; i < c.getEmailAdresses().size(); i++) {
+                    data += c.getEmailAdresses().get(i);
+                    if (i < c.getEmailAdresses().size()-1) {
+                        data += "%";
+                    }
+                }
+                fileOut.write(data+"\n");
+                fileOut.flush();
+            }
+
+        } catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     public TreeSet<Contact> getContactTree() {

@@ -1,11 +1,11 @@
 package project.appClasses;
 
 
-import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import project.ServiceLocator;
 import project.abstractClasses.Controller;
+import project.commonClasses.Translator;
 
 /**
  * Copyright 2015, FHNW, Prof. Dr. Brad Richards. All rights reserved. This code
@@ -16,16 +16,34 @@ import project.abstractClasses.Controller;
  */
 public class App_Controller extends Controller<App_Model, App_View> {
     ServiceLocator serviceLocator;
+    Translator translator;
 
     public App_Controller(App_Model model, App_View view) {
         super(model, view);
-        
+
+        serviceLocator = ServiceLocator.getServiceLocator();
+        translator = serviceLocator.getTranslator();
+
         for (Label l : view.getContactList()) {
+
+
             l.setOnMouseClicked(e -> {
                 updateDetails(l);
-                System.out.println("Label clicked");
+                serviceLocator.getLogger().info("Label clicked");
+                view.getGdMain().getBtnMorePhone().setDisable(false);
+                view.getGdMain().getBtnMoreEmail().setDisable(false);
             });
+
+            l.setOnMouseEntered(e -> {
+                l.getStyleClass().add("lbl_hover");
+            });
+
+            l.setOnMouseExited(e -> {
+                l.getStyleClass().remove("lbl_hover")
+;            });
         }
+
+
 
         view.getBtnEdit().setOnAction(e -> {
            for (TextField tf : view.getGdMain().getListTfDetails()) {
@@ -34,7 +52,7 @@ public class App_Controller extends Controller<App_Model, App_View> {
         });
 
         view.getBtnSave().setOnAction(e -> {
-            updateDetails();
+            saveChangesToObject();
             view.updateContactList();
             updateEventHandlerContactList();
         });
@@ -49,22 +67,11 @@ public class App_Controller extends Controller<App_Model, App_View> {
         });
 
         view.getBtnCreate().setOnAction(e -> {
-                Contact c = new Contact();
-                c.setFirstName(view.getGdNewEntry().getTfFirstName().getText());
-                c.setLastName(view.getGdNewEntry().getTfLastName().getText());
-                c.setAddress((view.getGdNewEntry().getTfAddress().getText()));
-                c.setCity(view.getGdNewEntry().getTfCity().getText());
-                c.setZip((view.getGdNewEntry().getTfZip().getText()));
-                if (view.getGdNewEntry().checkEntry()) {
-                    model.getContactTree().add(c);
-                    view.updateContactList();
-                    updateEventHandlerContactList();
-                    serviceLocator.getLogger().info("Contact successfully created");
-                    view.createSuccessAlert();
-
-                } else {
-                    view.createErrorAlert();
-                }
+            if (createContact()) {
+                serviceLocator.getLogger().info("New Contact successfully created");
+            } else {
+                serviceLocator.getLogger().info("Creating new contact failed");
+            }
         });
 
         view.getGdMain().getBtnMorePhone().setOnAction(e -> {
@@ -73,13 +80,61 @@ public class App_Controller extends Controller<App_Model, App_View> {
                 view.getGdMain().add(view.getGdMain().getLblPhone(), 0, 5);
                 view.getGdMain().add(view.getGdMain().getTfPhone(), 1, 5);
                 view.getGdMain().setPhoneCollapsed(false);
+                view.getGdMain().getBtnMorePhone().setText(translator.getString("btn.more"));
             } else {
-                view.getGdMain().getGridMorePhone().setModel(model);
-                view.getGdMain().getGridMorePhone().createGrid("Phone");
+                if (!view.getGdMain().getGridMorePhone().gridCreated) {
+                    view.getGdMain().getGridMorePhone().setModel(model);
+                    view.getGdMain().getGridMorePhone().createGrid("Phone");
+                }
                 view.getGdMain().add(view.getGdMain().getGridMorePhone(), 0, 5, 2, 1);
                 view.getGdMain().getChildren().remove(view.getGdMain().getLblPhone());
                 view.getGdMain().getChildren().remove(view.getGdMain().getTfPhone());
                 view.getGdMain().setPhoneCollapsed(true);
+                view.getGdMain().getBtnMorePhone().setText(translator.getString("btn.less"));
+            }
+        });
+
+        view.getGdMain().getBtnMoreEmail().setOnAction(e -> {
+            if (view.getGdMain().isEmailCollapsed()) {
+                view.getGdMain().getChildren().remove(view.getGdMain().getGridMoreEmail());
+                view.getGdMain().add(view.getGdMain().getLblEmail(), 0, 6);
+                view.getGdMain().add(view.getGdMain().getTfEmail(), 1, 6);
+                view.getGdMain().setEmailCollapsed(false);
+                view.getGdMain().getBtnMoreEmail().setText(translator.getString("btn.more"));
+            } else {
+                if (!view.getGdMain().getGridMoreEmail().gridCreated) {
+                    view.getGdMain().getGridMoreEmail().setModel(model);
+                    view.getGdMain().getGridMoreEmail().createGrid("Email");
+                }
+                view.getGdMain().add(view.getGdMain().getGridMoreEmail(), 0, 6, 2, 1);
+                view.getGdMain().getChildren().remove(view.getGdMain().getLblEmail());
+                view.getGdMain().getChildren().remove(view.getGdMain().getTfEmail());
+                view.getGdMain().setEmailCollapsed(true);
+                view.getGdMain().getBtnMoreEmail().setText(translator.getString("btn.less"));
+            }
+        });
+
+        view.getGdNewEntry().getBtnMorePhone().setOnAction(e -> {
+           if (view.getGdNewEntry().getGridMorePhone().gridCreated) {
+               view.getGdNewEntry().getGridMorePhone().addNewPhone();
+           } else {
+               view.getGdNewEntry().getChildren().remove(view.getGdNewEntry().getLblPhone());
+               view.getGdNewEntry().getChildren().remove(view.getGdNewEntry().getTfPhone());
+               view.getGdNewEntry().getGridMorePhone().initNewPhone();
+               view.getGdNewEntry().add(view.getGdNewEntry().getGridMorePhone(), 0, 5, 2, 1);
+               view.getGdNewEntry().getGridMorePhone().addNewPhone();
+           }
+        });
+
+        view.getGdNewEntry().getBtnMoreEmail().setOnAction(e -> {
+            if (view.getGdNewEntry().getGridMoreEmail().gridCreated) {
+                view.getGdNewEntry().getGridMoreEmail().addEmail();
+            } else {
+                view.getGdNewEntry().getChildren().remove(view.getGdNewEntry().getLblEmail());
+                view.getGdNewEntry().getChildren().remove(view.getGdNewEntry().getTfEmail());
+                view.getGdNewEntry().getGridMoreEmail().initNewEmail();
+                view.getGdNewEntry().add(view.getGdNewEntry().getGridMoreEmail(), 0, 6, 2, 1);
+                view.getGdNewEntry().getGridMoreEmail().addEmail();
             }
         });
 
@@ -87,9 +142,20 @@ public class App_Controller extends Controller<App_Model, App_View> {
         view.getBtnCreateCancel().setOnAction(e -> {
             view.closeWindowNewContact();
         });
-        
-        serviceLocator = ServiceLocator.getServiceLocator();        
+
+        view.getStageNewEntry().setOnCloseRequest(e-> {
+            view.closeWindowNewContact();
+        });
+
+        view.getStage().setOnCloseRequest(e -> {
+            model.saveDataToFile();
+            serviceLocator.getLogger().info("Data saved to file");
+        });
+
+
+
         serviceLocator.getLogger().info("Application controller initialized");
+
     }
     
     private void updateDetails(Label l) {
@@ -111,9 +177,56 @@ public class App_Controller extends Controller<App_Model, App_View> {
         view.getGdMain().getTfAddress().setText(contact.getAddress());
         view.getGdMain().getTfCity().setText(contact.getCity());
         view.getGdMain().getTfZip().setText(contact.getZip());
+        view.getGdMain().getTfPhone().setText(contact.getPhoneNumbers().get(0));
+        view.getGdMain().getTfEmail().setText(contact.getEmailAdresses().get(0));
     }
 
-    private void updateDetails() {
+    private boolean createContact() {
+        boolean success = false;
+        Contact c = new Contact();
+        c.setFirstName(view.getGdNewEntry().getTfFirstName().getText());
+        c.setLastName(view.getGdNewEntry().getTfLastName().getText());
+        c.setAddress((view.getGdNewEntry().getTfAddress().getText()));
+        c.setCity(view.getGdNewEntry().getTfCity().getText());
+        c.setZip((view.getGdNewEntry().getTfZip().getText()));
+        if (view.getGdNewEntry().getGridMorePhone().getPhoneCount() > 1) {
+            for (TextField t : view.getGdNewEntry().getGridMorePhone().getListTextFields()) {
+                if (t.getText().equals("")) {
+                    // do nothing, empty phone number
+                } else {
+                    c.getPhoneNumbers().add(t.getText());
+                }
+            }
+        } else {
+            c.getPhoneNumbers().add(view.getGdNewEntry().getTfPhone().getText());
+        }
+        if (view.getGdNewEntry().getGridMoreEmail().getEmailCount() > 1) {
+            for (TextField t : view.getGdNewEntry().getGridMoreEmail().getListTextFields()) {
+                if (t.getText().equals("")) {
+                    // do nothing
+                } else {
+                    c.getEmailAdresses().add(t.getText());
+                }
+            }
+        } else {
+            c.getEmailAdresses().add(view.getGdNewEntry().getTfEmail().getText());
+        }
+        if (view.getGdNewEntry().checkEntry()) {
+            model.getContactTree().add(c);
+            success = true;
+            view.updateContactList();
+            updateEventHandlerContactList();
+            serviceLocator.getLogger().info("Contact successfully created");
+            view.createSuccessAlert();
+            resetDetails();
+        } else {
+            view.createErrorAlert();
+            success = false;
+        }
+        return success;
+    }
+
+    private void saveChangesToObject() {
         for (Contact c : model.getContactTree()) {
             if (c.isActive()) {
                 c.setFirstName(view.getGdMain().getTfFirstName().getText());
@@ -121,6 +234,7 @@ public class App_Controller extends Controller<App_Model, App_View> {
                 c.setAddress(view.getGdMain().getTfAddress().getText());
                 c.setCity(view.getGdMain().getTfCity().getText());
                 c.setZip(view.getGdMain().getTfZip().getText());
+                // TODO PhoneNumbers and Email
             }
         }
     }
@@ -137,7 +251,7 @@ public class App_Controller extends Controller<App_Model, App_View> {
         view.updateContactList();
     }
 
-    private void createContact() {
+    private void resetDetails() {
         view.getGdMain().getTfFirstName().setText("");
         view.getGdMain().getTfLastName().setText("");
         view.getGdMain().getTfAddress().setText("");

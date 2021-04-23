@@ -31,6 +31,14 @@ public class Contact implements Comparable<Contact>{
        return result;
     }
 
+    public boolean equals(Contact o) {
+        if (this.lastName.equals(o.lastName) && this.firstName.equals(o.firstName) && this.address.equals(o.address)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public String getFirstName() {
         return firstName;
     }

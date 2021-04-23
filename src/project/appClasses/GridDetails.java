@@ -37,17 +37,26 @@ public class GridDetails extends GridPane {
     MoreDetails gridMorePhone = new MoreDetails();
     MoreDetails gridMoreEmail = new MoreDetails();
 
+    private int lengthOfLabels = 150;
+
 
     public GridDetails() {
         super();
         Translator t = ServiceLocator.getServiceLocator().getTranslator();
         lblFirstName = new Label(t.getString("lbl.firstName"));
+        lblFirstName.setMaxWidth(lengthOfLabels);
         lblLastName = new Label(t.getString("lbl.lastName"));
+        lblLastName.setMaxWidth(lengthOfLabels);
         lblAddress = new Label(t.getString("lbl.address"));
+        lblAddress.setMaxWidth(lengthOfLabels);
         lblCity = new Label(t.getString("lbl.city"));
+        lblCity.setMaxWidth(lengthOfLabels);
         lblZip = new Label(t.getString("lbl.zip"));
+        lblZip.setMaxWidth(lengthOfLabels);
         lblPhone = new Label(t.getString("lbl.phone"));
-        lblEmail = new Label("Email");
+        lblPhone.setMaxWidth(lengthOfLabels);
+        lblEmail = new Label(t.getString("lbl.email"));
+        lblEmail.setMaxWidth(lengthOfLabels);
 
         this.add(lblFirstName, 0, 0);
         this.add(lblLastName, 0, 1);
@@ -90,10 +99,11 @@ public class GridDetails extends GridPane {
     }
 
     public boolean checkEntry(){
-        for (TextField t : listTfDetails) {
-            if (t.getText().equals("")) {
-                return false;
-            }
+        // check textfields for whitespace in name as this would lead to a nullpointer
+        if (tfFirstName.getText().contains(" ")) {
+            return false;
+        } else if (tfLastName.getText().contains(" ")) {
+            return false;
         }
         return true;
     }
@@ -256,5 +266,13 @@ public class GridDetails extends GridPane {
 
     public MoreDetails getGridMoreEmail() {
         return gridMoreEmail;
+    }
+
+    public void setGridMorePhone(MoreDetails gridMorePhone) {
+        this.gridMorePhone = gridMorePhone;
+    }
+
+    public void setGridMoreEmail(MoreDetails gridMoreEmail) {
+        this.gridMoreEmail = gridMoreEmail;
     }
 }

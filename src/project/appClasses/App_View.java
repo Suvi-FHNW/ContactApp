@@ -6,14 +6,12 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import jdk.nashorn.internal.ir.Labels;
 import project.ServiceLocator;
 import project.abstractClasses.View;
 import project.commonClasses.Translator;
 import javafx.scene.Scene;
-import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 /**
@@ -37,7 +35,7 @@ public class App_View extends View<App_Model> {
     private GridPane gridDetails;
     private VBox rootRight;
     private GridDetails gdMain;
-    private GridDetails gdNewEntry;
+    private GridDetails gdNewEntry = new GridDetails();
 
     private Label title;
     private ArrayList<Label> contactList;
@@ -53,8 +51,6 @@ public class App_View extends View<App_Model> {
 
 	private Alert alertError;
 	private Alert alertSuccess;
-
-
 
 
 	public App_View(Stage stage, App_Model model) {
@@ -84,19 +80,23 @@ public class App_View extends View<App_Model> {
                 updateTexts();
             });
         }
-	    
-        menuHelp = new Menu();
-	    menuBar.getMenus().addAll(menuFile, menuHelp);
-	    menuBar.setTranslateX(500);
+
+	    menuBar.getMenus().add(menuFile);
+	    menuBar.setTranslateX(400);
 		
 		root = new Pane();
 		root.getChildren().add(menuBar);
 		root.getChildren().add(setRootLeft());
 		root.getChildren().add(setRootRight());
-        
+
+		root.getChildren().add(btnOpenCreate);
+		btnOpenCreate.setTranslateX(350);
+		btnOpenCreate.setTranslateY(500);
+        stageNewEntry = new Stage();
+        stageNewEntry.setResizable(false);
         updateTexts();
 		
-        Scene scene = new Scene(root, 805, 500);
+        Scene scene = new Scene(root, 550, 700);
         scene.getStylesheets().add(
                 getClass().getResource("app.css").toExternalForm());
         return scene;
@@ -114,7 +114,6 @@ public class App_View extends View<App_Model> {
 	        // The menu entries
 	       menuFile.setText(t.getString("program.menu.file"));
 	       menuFileLanguage.setText(t.getString("program.menu.file.language"));
-           menuHelp.setText(t.getString("program.menu.help"));
 	        
 	        // Other controls
            // btnClick.setText(t.getString("button.clickme"));
@@ -123,6 +122,25 @@ public class App_View extends View<App_Model> {
            gdMain.getLblAddress().setText(t.getString("lbl.address"));
            gdMain.getLblCity().setText(t.getString("lbl.city"));
            gdMain.getLblZip().setText(t.getString("lbl.zip"));
+           if (gdMain.isPhoneCollapsed()) {
+			   gdMain.getBtnMorePhone().setText(t.getString("btn.less"));
+		   } else {
+           	   gdMain.getBtnMorePhone().setText(t.getString("btn.more"));
+		   }
+           if (gdMain.isEmailCollapsed()) {
+           	   gdMain.getBtnMoreEmail().setText(t.getString("btn.less"));
+		   } else {
+           	   gdMain.getBtnMoreEmail().setText(t.getString("btn.more"));
+		   }
+           gdMain.getLblPhone().setText(t.getString("lbl.phone"));
+           gdMain.getLblEmail().setText(t.getString("lbl.email"));
+
+
+           for (int i = 0; i < gdMain.getGridMorePhone().getListLabels().size(); i++) {
+           		int pos = i+1;
+           		gdMain.getGridMorePhone().getListLabels().get(i).setText(t.getString("lbl.phone") + " " + pos);
+		   }
+
            title.setText(t.getString("lbl.title"));
            btnEdit.setText(t.getString("btn.edit"));
            btnSave.setText(t.getString("btn.save"));
@@ -135,52 +153,63 @@ public class App_View extends View<App_Model> {
 		   }
            alertError.setContentText(t.getString("msg.inputError"));
            alertSuccess.setContentText(t.getString("msg.inputSuccess"));
+
+           stageNewEntry.setTitle(t.getString("lbl.titleNewContact"));
+
 	   }
 
 	   private VBox setRootLeft() {
 	    boxOverview = new VBox(20);
 	    paneContactList = new ScrollPane();
+	    paneContactList.setMaxWidth(200);
 	    boxContactList = new VBox();
 	    title = new Label(t.getString("lbl.title"));
-	    boxContactList.setMaxWidth(500);
+	    title.setId("h1");
+	    boxContactList.setMaxWidth(200);
+	    boxContactList.setId("box");
 	    boxOverview.getChildren().add(title);
 	    contactList = new ArrayList<>();
 
 	    for (Contact c : model.getContactTree()) {
 	        Label l = new Label(c.getFirstName() + " " + c.getLastName());
-	        l.setMinWidth(300);
+	        l.setMinWidth(200);
 	        contactList.add(l);
         }
 	    boxContactList.getChildren().addAll(contactList);
 	    paneContactList.setContent(boxContactList);
-	    paneContactList.setMaxHeight(350);
+	    paneContactList.setMaxHeight(500);
 	    paneContactList.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 	    paneContactList.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
 	    boxOverview.getChildren().add(paneContactList);
-	    boxOverview.setTranslateY(50);
-	    boxOverview.setTranslateX(50);
+	    boxOverview.setTranslateY(10);
+	    boxOverview.setTranslateX(10);
 	    return boxOverview;
        }
 
        private VBox setRootRight() {
 		   rootRight = new VBox(50);
 		   gdMain = new GridDetails();
+
+		   gdMain.getBtnMorePhone().setDisable(true);
+		   gdMain.getBtnMoreEmail().setDisable(true);
 		   rootRight.getChildren().add(gdMain);
 
 		   btnEdit = new Button(t.getString("btn.edit"));
 		   btnSave = new Button(t.getString("btn.save"));
 		   btnDelete = new Button(t.getString("btn.delete"));
 		   btnOpenCreate = new Button(t.getString("btn.create"));
-		   HBox box = new HBox(5);
-		   box.getChildren().addAll(btnOpenCreate, btnEdit, btnSave, btnDelete);
+		   HBox box = new HBox(20);
+		   box.setTranslateX(10);
+		   box.getChildren().addAll(btnEdit, btnSave, btnDelete);
 		   rootRight.getChildren().add(box);
+
 
 		   for (TextField f : gdMain.getListTfDetails()) {
 			   f.setEditable(false);
-			   f.setMinWidth(200);
+			   f.setMinWidth(150);
 		   }
 
-		   rootRight.setTranslateX(440);
+		   rootRight.setTranslateX(220);
 		   rootRight.setTranslateY(100);
 
 		   return rootRight;
@@ -192,32 +221,64 @@ public class App_View extends View<App_Model> {
 		for (Contact c : model.getContactTree()) {
 			Label l = new Label(c.getFirstName()+" "+c.getLastName());
 			contactList.add(l);
-			l.setMinWidth(300);
+			l.setMinWidth(200);
 		}
 		boxContactList.getChildren().addAll(contactList);
 	}
 
 	   public void createWindowNewContact() {
-		Pane root = new Pane();
-		gdNewEntry = new GridDetails();
-		root.getChildren().add(gdNewEntry);
+		ScrollPane root = new ScrollPane();
+		root.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+		root.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+		gdNewEntry.setId("gridNewContact");
+		root.setContent(gdNewEntry);
 
 		btnCreate.setText(t.getString("btn.create"));
 		btnCreateCancel.setText(t.getString("btn.createCancel"));
-		HBox box = new HBox(50);
+		HBox box = new HBox(150);
 		box.getChildren().addAll(btnCreate, btnCreateCancel);
+		Region spacer = new Region();
+		spacer.setMinHeight(20);
+		gdNewEntry.add(spacer, 0, 10, 2, 1);
+		gdNewEntry.add(box, 0, 11, 2, 1);
 
-		gdNewEntry.add(box, 0, 10, 2, 1);
+		gdNewEntry.getBtnMorePhone().setText(t.getString("btn.addPhone"));
+		gdNewEntry.getBtnMoreEmail().setText(t.getString("btn.addEmail"));
 
+		gdNewEntry.getStyleClass().add("root");
 
 		Scene scene = new Scene(root);
 		scene.getStylesheets().add(getClass().getResource("app.css").toExternalForm());
-		stageNewEntry = new Stage();
 		stageNewEntry.setScene(scene);
+		stageNewEntry.setTitle(t.getString("lbl.titleNewContact"));
 		stageNewEntry.show();
 	   }
 
 	   public void closeWindowNewContact() {
+		gdNewEntry = new GridDetails();
+		gdNewEntry.getBtnMorePhone().setOnAction(e -> {
+			if (gdNewEntry.getGridMorePhone().gridCreated) {
+				gdNewEntry.getGridMorePhone().addNewPhone();
+			} else {
+				gdNewEntry.getChildren().remove(gdNewEntry.getLblPhone());
+				gdNewEntry.getChildren().remove(gdNewEntry.getTfPhone());
+				gdNewEntry.getGridMorePhone().initNewPhone();
+				gdNewEntry.add(gdNewEntry.getGridMorePhone(), 0, 5, 2, 1);
+				gdNewEntry.getGridMorePhone().addNewPhone();
+			}
+		});
+
+		   gdNewEntry.getBtnMoreEmail().setOnAction(e -> {
+			   if (gdNewEntry.getGridMoreEmail().gridCreated) {
+				   gdNewEntry.getGridMoreEmail().addEmail();
+			   } else {
+				   gdNewEntry.getChildren().remove(gdNewEntry.getLblEmail());
+				   gdNewEntry.getChildren().remove(gdNewEntry.getTfEmail());
+				   gdNewEntry.getGridMoreEmail().initNewEmail();
+				   gdNewEntry.add(gdNewEntry.getGridMoreEmail(), 0, 6, 2, 1);
+				   gdNewEntry.getGridMoreEmail().addEmail();
+			   }
+		   });
 		stageNewEntry.close();
 	   }
 
@@ -242,8 +303,6 @@ public class App_View extends View<App_Model> {
 		   		stageNewEntry.close();
 		   }
 	   }
-
-
 
 	public ArrayList<Label> getContactList() {
 		return contactList;
@@ -283,6 +342,10 @@ public class App_View extends View<App_Model> {
 
 	public GridDetails getGdNewEntry() {
 		return gdNewEntry;
+	}
+
+	public Stage getStageNewEntry() {
+		return stageNewEntry;
 	}
 }
 
